@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Profile Scanner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .icon-large {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            color: white;
+            font-size: 32px;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+
+        h2 {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h3 {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        p {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .button {
+            width: 100%;
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(34, 211, 238, 0.3);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4);
+        }
+
+        .button-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: none;
+            padding: 12px 24px;
+            width: auto;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            align-items: start;
+        }
+
+        .alert-warning {
+            background: rgba(251, 191, 36, 0.2);
+            border: 1px solid rgba(251, 191, 36, 0.5);
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 2px solid #22c55e;
+        }
+
+        .alert-medium {
+            background: rgba(251, 191, 36, 0.2);
+            border: 2px solid #fbbf24;
+        }
+
+        .alert-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(236, 72, 153, 0.3);
+            color: #fce7f3;
+            border-radius: 16px;
+            font-size: 14px;
+            border: 1px solid rgba(236, 72, 153, 0.5);
+            margin: 4px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .stat-value {
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .tracker-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            margin-bottom: 8px;
+        }
+
+        .cookie-item {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 8px;
+        }
+
+        .cookie-name {
+            color: #22d3ee;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+            margin-bottom: 4px;
+        }
+
+        .cookie-value {
+            color: rgba(255, 255, 255, 0.6);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            word-break: break-all;
+        }
+
+        .cookie-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .tips-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .tips-list li {
+            color: rgba(255, 255, 255, 0.9);
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .cookie-count {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 12px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Initial Scan Screen -->
+        <div id="scanScreen" class="card">
+            <div class="header">
+                <div class="icon-large">👁️</div>
+                <h1>Cookie Profile Scanner</h1>
+                <p>Discover how advertisers and tracking companies see you based on the cookies stored in your browser.</p>
+            </div>
+
+            <div class="alert alert-warning">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">
+                    <strong>Privacy Note:</strong> This tool only reads cookies accessible to this page. No data is sent anywhere - everything happens in your browser.
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <div class="alert-icon">📱</div>
+                <div class="alert-content">
+                    <strong>Mobile Optimized:</strong> This scanner works on smartphones and tablets. For best results, scan after browsing various websites.
+                </div>
+            </div>
+
+            <button class="button" onclick="scanCookies()">Scan My Cookies</button>
+
+            <div class="cookie-count" id="cookieCount">Checking for cookies...</div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="hidden">
+            <!-- Header -->
+            <div class="card">
+                <div class="header-flex">
+                    <h2>
+                        <span>👁️</span>
+                        Your Digital Profile
+                    </h2>
+                    <button class="button button-secondary" onclick="resetScanner()">Scan Again</button>
+                </div>
+                <p id="profileSummary"></p>
+            </div>
+
+            <!-- Privacy Risk Alert -->
+            <div id="privacyAlert" class="card"></div>
+
+            <!-- Profile Cards -->
+            <div class="grid">
+                <!-- Interests -->
+                <div class="card">
+                    <h3>
+                        <span>📈</span>
+                        Your Interests
+                    </h3>
+                    <div id="interestsTags"></div>
+                </div>
+
+                <!-- Demographics -->
+                <div class="card">
+                    <h3>
+                        <span>👥</span>
+                        Demographics
+                    </h3>
+                    <div id="demographics"></div>
+                </div>
+
+                <!-- Ad Category -->
+                <div class="card">
+                    <h3>
+                        <span>🛍️</span>
+                        Ad Category
+                    </h3>
+                    <div id="adCategory"></div>
+                </div>
+
+                <!-- Engagement Level -->
+                <div class="card">
+                    <h3>
+                        <span>🌐</span>
+                        Engagement
+                    </h3>
+                    <div id="engagement"></div>
+                </div>
+            </div>
+
+            <!-- Trackers -->
+            <div id="trackersCard" class="card hidden">
+                <h3>🚨 Tracking Companies Detected</h3>
+                <div id="trackersList"></div>
+            </div>
+
+            <!-- Raw Cookies -->
+            <div class="card">
+                <h3>🍪 Raw Cookies Found (<span id="cookieTotal">0</span>)</h3>
+                <div id="cookiesList" class="cookie-list"></div>
+            </div>
+
+            <!-- Tips -->
+            <div class="card" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%);">
+                <h3>💡 What Can You Do?</h3>
+                <ul class="tips-list">
+                    <li>• Clear cookies regularly in your browser settings</li>
+                    <li>• Use privacy-focused browsers or extensions</li>
+                    <li>• Enable "Do Not Track" in your browser</li>
+                    <li>• Review and adjust privacy settings on websites</li>
+                    <li>• Use incognito/private browsing mode</li>
+                    <li>• Consider using a VPN for additional privacy</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update cookie count on load
+        window.addEventListener('load', function() {
+            updateCookieCount();
+        });
+
+        function updateCookieCount() {
+            const cookieCount = document.cookie.split(';').filter(c => c.trim()).length;
+            document.getElementById('cookieCount').textContent = 
+                `Found ${cookieCount} cookie${cookieCount !== 1 ? 's' : ''} in your browser`;
+        }
+
+        function scanCookies() {
+            // Get all cookies
+            const allCookies = document.cookie.split(';').map(cookie => {
+                const [name, value] = cookie.trim().split('=');
+                return { name, value: value || '' };
+            }).filter(c => c.name);
+
+            // Analyze cookies
+            const interests = new Set();
+            const trackers = new Set();
+
+            allCookies.forEach(cookie => {
+                const name = cookie.name.toLowerCase();
+                const value = cookie.value.toLowerCase();
+
+                // Detect tracking cookies
+                if (name.includes('_ga') || name.includes('google') || name.includes('gid')) {
+                    trackers.add('Google Analytics');
+                }
+                if (name.includes('_fb') || name.includes('facebook')) {
+                    trackers.add('Facebook Pixel');
+                }
+                if (name.includes('doubleclick')) {
+                    trackers.add('Google DoubleClick');
+                }
+                if (name.includes('_utm')) {
+                    trackers.add('Marketing Campaign Tracker');
+                }
+                if (name.includes('_pinterest') || name.includes('_pin')) {
+                    trackers.add('Pinterest');
+                }
+                if (name.includes('twitter') || name.includes('twtr')) {
+                    trackers.add('Twitter/X');
+                }
+                if (name.includes('linkedin')) {
+                    trackers.add('LinkedIn');
+                }
+
+                // Detect interest signals
+                if (value.includes('tech') || value.includes('gadget') || name.includes('tech')) {
+                    interests.add('Technology');
+                }
+                if (value.includes('fashion') || value.includes('clothing')) {
+                    interests.add('Fashion');
+                }
+                if (value.includes('food') || value.includes('recipe')) {
+                    interests.add('Cooking & Food');
+                }
+                if (value.includes('travel') || value.includes('hotel')) {
+                    interests.add('Travel');
+                }
+                if (value.includes('fitness') || value.includes('health')) {
+                    interests.add('Health & Fitness');
+                }
+                if (value.includes('news') || name.includes('news')) {
+                    interests.add('News & Media');
+                }
+                if (value.includes('shop') || name.includes('cart')) {
+                    interests.add('Online Shopping');
+                }
+            });
+
+            // Generate profile
+            const profile = {
+                interests: interests.size > 0 ? Array.from(interests) : ['General Web User', 'News & Information'],
+                trackers: Array.from(trackers),
+                ageRange: '25-44',
+                deviceType: /Mobile|Android|iPhone/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
+                browser: navigator.userAgent.includes('Chrome') ? 'Chrome' : 
+                         navigator.userAgent.includes('Safari') ? 'Safari' : 
+                         navigator.userAgent.includes('Firefox') ? 'Firefox' : 
+                         navigator.userAgent.includes('Edge') ? 'Edge' : 'Other',
+                adCategory: interests.has('Technology') ? 'Technology & Innovation' : 
+                           interests.has('Fashion') ? 'Lifestyle & Fashion' :
+                           interests.has('Travel') ? 'Travel & Leisure' : 'General Consumer',
+                engagementLevel: allCookies.length > 10 ? 'High' : allCookies.length > 5 ? 'Medium' : 'Low',
+                privacyRisk: trackers.size > 3 ? 'High' : trackers.size > 1 ? 'Medium' : 'Low'
+            };
+
+            displayResults(allCookies, profile);
+        }
+
+        function displayResults(cookies, profile) {
+            // Hide scan screen, show results
+            document.getElementById('scanScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+
+            // Profile summary
+            document.getElementById('profileSummary').textContent = 
+                `Here's how tracking companies might categorize you based on ${cookies.length} cookie${cookies.length !== 1 ? 's' : ''} found.`;
+
+            // Privacy risk alert
+            const alertDiv = document.getElementById('privacyAlert');
+            const alertClass = profile.privacyRisk === 'High' ? 'alert-danger' : 
+                              profile.privacyRisk === 'Medium' ? 'alert-medium' : 'alert-success';
+            const alertIcon = profile.privacyRisk === 'High' || profile.privacyRisk === 'Medium' ? '🛡️' : '✅';
+            const alertText = profile.privacyRisk === 'High' ? 'Multiple tracking companies are monitoring your activity.' :
+                            profile.privacyRisk === 'Medium' ? 'Some tracking cookies detected. Consider reviewing your privacy settings.' :
+                            'Minimal tracking detected. Your privacy is relatively protected.';
+            
+            alertDiv.className = `card ${alertClass}`;
+            alertDiv.innerHTML = `
+                <h2>
+                    <span>${alertIcon}</span>
+                    Privacy Risk: ${profile.privacyRisk}
+                </h2>
+                <p style="margin-bottom: 0;">${alertText}</p>
+            `;
+
+            // Interests
+            const interestsDiv = document.getElementById('interestsTags');
+            interestsDiv.innerHTML = profile.interests.map(interest => 
+                `<span class="tag">${interest}</span>`
+            ).join('');
+
+            // Demographics
+            const demographicsDiv = document.getElementById('demographics');
+            demographicsDiv.innerHTML = `
+                <div class="stat-row">
+                    <span class="stat-label">Age Range:</span>
+                    <span class="stat-value">${profile.ageRange}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Device:</span>
+                    <span class="stat-value">${profile.deviceType}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Browser:</span>
+                    <span class="stat-value">${profile.browser}</span>
+                </div>
+            `;
+
+            // Ad Category
+            const adCategoryDiv = document.getElementById('adCategory');
+            adCategoryDiv.innerHTML = `
+                <p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">${profile.adCategory}</p>
+                <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 0;">
+                    Advertisers target you with ads in this category based on your browsing patterns.
+                </p>
+            `;
+
+            // Engagement
+            const engagementDiv = document.getElementById('engagement');
+            engagementDiv.innerHTML = `
+                <p style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">${profile.engagementLevel}</p>
+                <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 0;">
+                    Your online activity level compared to average users.
+                </p>
+            `;
+
+            // Trackers
+            if (profile.trackers.length > 0) {
+                const trackersCard = document.getElementById('trackersCard');
+                trackersCard.classList.remove('hidden');
+                const trackersList = document.getElementById('trackersList');
+                trackersList.innerHTML = profile.trackers.map(tracker => `
+                    <div class="tracker-item">
+                        <span style="font-size: 20px;">⚠️</span>
+                        <span style="color: white; font-weight: 500;">${tracker}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Cookies list
+            document.getElementById('cookieTotal').textContent = cookies.length;
+            const cookiesList = document.getElementById('cookiesList');
+            
+            if (cookies.length === 0) {
+                cookiesList.innerHTML = `
+                    <p style="color: rgba(255,255,255,0.7); font-size: 14px;">
+                        No cookies found. This might mean you have a clean browser or strong privacy settings enabled.
+                        Try browsing some websites and scan again to see tracking cookies.
+                    </p>
+                `;
+            } else {
+                cookiesList.innerHTML = cookies.map(cookie => `
+                    <div class="cookie-item">
+                        <div class="cookie-name">${cookie.name}</div>
+                        <div class="cookie-value">${cookie.value.substring(0, 150)}${cookie.value.length > 150 ? '...' : ''}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function resetScanner() {
+            document.getElementById('resultsScreen').classList.add('hidden');
+            document.getElementById('scanScreen').classList.remove('hidden');
+            updateCookieCount();
+        }
+    </script>
+</body>
+</html>
